@@ -39,7 +39,13 @@ public:
 
     void admitPatient(RoomType type);
     void dischargePatient();
-    void addMedicalRecord(string record);
+    void addMedicalRecord(string record) {
+        if (record.empty()) return;
+
+        medicalHistory.push(record);
+
+        cout << "Medical Record added for [" << name << "]: [" << record << "]\n";
+    }
     void requestTest(string testName);
     string performTest();
     void displayHistory();
@@ -63,8 +69,12 @@ public:
     void addAppointment(int patientId);
     int seePatient();
 
-    int getId();
-    string getName();
+    int getId() {
+        return id;
+    }
+    string getName() {
+        return name;
+    }
     string getDepartment();
 };
 
