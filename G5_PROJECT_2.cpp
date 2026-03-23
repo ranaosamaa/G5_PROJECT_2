@@ -35,18 +35,56 @@ private:
     RoomType roomType;
 
 public:
-    Patient(int pid, string n, int a, string c);
+    Patient(int pid, string n, int a, string c) {
+        id = pid;
+        name = n;
+        age = a;
+        contact = c;
+        isAdmitted = false;
+    }
 
     void admitPatient(RoomType type);
     void dischargePatient();
     void addMedicalRecord(string record);
-    void requestTest(string testName);
-    string performTest();
-    void displayHistory();
+    void requestTest(string testName) {
+        testQueue.push(testName);
+        cout << "Test requested for " << name << ": " << testName << endl;
+    }
+    string performTest() {
+        if (testQueue.empty()) {
+            cout << "No pending tests for " << name << endl;
+            return "";
+        }
 
-    int getId();
-    string getName();
-    bool getAdmissionStatus();
+        string testName = testQueue.front();
+        testQueue.pop();
+
+        cout << "Performing test for " << name << ": " << testName << endl;
+        return testName;
+    }
+    void displayHistory() {
+        stack<string> temp = medicalHistory;
+        if (temp.empty()) {
+            cout << "No Medical history for patient: " << name << endl;
+            return;
+        }
+        cout << "Medical History for Patient: " << name << " - ID: " << id << endl;
+        while (!temp.empty()) {
+            cout << temp.top() << endl;
+            cout << "----------------------------" << endl;
+            temp.pop();
+        }
+    }
+
+    int getId() {
+        return id;
+    }
+    string getName() {
+        return name;
+    }
+    bool getAdmissionStatus() {
+        return isAdmitted;
+    }
 };
 
 // ========== DOCTOR CLASS ========== //
@@ -65,7 +103,17 @@ public:
 
     int getId();
     string getName();
-    string getDepartment();
+    string getDepartment() {
+        switch (department) {
+        case CARDIOLOGY: return "Cardiology";
+        case NEUROLOGY: return "Neurology";
+        case ORTHOPEDICS: return "Orthopedics";
+        case PEDIATRICS: return "Pediatrics";
+        case EMERGENCY: return "Emergency";
+        case GENERAL: return "General";
+        default: return "Unknown";
+        }
+    }
 };
 
 // ========== HOSPITAL CLASS ========== //
@@ -89,39 +137,6 @@ public:
     void displayPatientInfo(int patientId);
     void displayDoctorInfo(int doctorId);
 };
-
-// Adds a test to the patient's test queue (FIFO order)
-void Patient::requestTest(string testName) {
-    testQueue.push(testName);
-    cout << "Test requested for " << name << ": " << testName << endl;
-}
-
-// Performs the next test in the queue (first requested, first done)
-// If no tests are pending, it prints a message
-string Patient::performTest() {
-    if (testQueue.empty()) {
-        cout << "No pending tests for " << name << endl;
-        return "";
-    }
-
-    string testName = testQueue.front();
-    testQueue.pop();
-
-    cout << "Performing test for " << name << ": " << testName << endl;
-    return testName;
-}
-// Converts the department enum into a readable string
-string Doctor::getDepartment() {
-    switch (department) {
-        case CARDIOLOGY: return "Cardiology";
-        case NEUROLOGY: return "Neurology";
-        case ORTHOPEDICS: return "Orthopedics";
-        case PEDIATRICS: return "Pediatrics";
-        case EMERGENCY: return "Emergency";
-        case GENERAL: return "General";
-        default: return "Unknown";
-    }
-}
 
 // ========== MAIN PROGRAM ========== //
 int main() {
