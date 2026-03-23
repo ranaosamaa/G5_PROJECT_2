@@ -90,6 +90,39 @@ public:
     void displayDoctorInfo(int doctorId);
 };
 
+// Adds a test to the patient's test queue (FIFO order)
+void Patient::requestTest(string testName) {
+    testQueue.push(testName);
+    cout << "Test requested for " << name << ": " << testName << endl;
+}
+
+// Performs the next test in the queue (first requested, first done)
+// If no tests are pending, it prints a message
+string Patient::performTest() {
+    if (testQueue.empty()) {
+        cout << "No pending tests for " << name << endl;
+        return "";
+    }
+
+    string testName = testQueue.front();
+    testQueue.pop();
+
+    cout << "Performing test for " << name << ": " << testName << endl;
+    return testName;
+}
+// Converts the department enum into a readable string
+string Doctor::getDepartment() {
+    switch (department) {
+        case CARDIOLOGY: return "Cardiology";
+        case NEUROLOGY: return "Neurology";
+        case ORTHOPEDICS: return "Orthopedics";
+        case PEDIATRICS: return "Pediatrics";
+        case EMERGENCY: return "Emergency";
+        case GENERAL: return "General";
+        default: return "Unknown";
+    }
+}
+
 // ========== MAIN PROGRAM ========== //
 int main() {
     Hospital hospital;
