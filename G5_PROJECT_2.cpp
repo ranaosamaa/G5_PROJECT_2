@@ -52,13 +52,44 @@ public:
 
         cout << "Medical Record added for [" << name << "]: [" << record << "]\n";
     }
-    void requestTest(string testName);
-    string performTest();
-    void displayHistory();
+    void requestTest(string testName) {
+        testQueue.push(testName);
+        cout << "Test requested for " << name << ": " << testName << endl;
+    }
+    string performTest() {
+        if (testQueue.empty()) {
+            cout << "No pending tests for " << name << endl;
+            return "";
+        }
+        string testName = testQueue.front();
+        testQueue.pop();
 
-    int getId();
-    string getName();
-    bool getAdmissionStatus();
+        cout << "Performing test for " << name << ": " << testName << endl;
+        return testName;
+    }
+    void displayHistory() {
+        stack<string> temp = medicalHistory;
+        if (temp.empty()) {
+            cout << "No Medical history for patient: " << name << endl;
+            return;
+        }
+        cout << "Medical History for Patient: " << name << " - ID: " << id << endl;
+        while (!temp.empty()) {
+            cout << temp.top() << endl;
+            cout << "----------------------------" << endl;
+            temp.pop();
+        }
+    }
+
+    int getId() {
+        return id;
+    }
+    string getName() {
+        return name;
+    }
+    bool getAdmissionStatus() {
+        return isAdmitted;
+    }
 };
 
 // ========== DOCTOR CLASS ========== //
@@ -70,10 +101,25 @@ private:
     queue<int> appointmentQueue;
 
 public:
-    Doctor(int did, string n, Department d);
+    Doctor(int did, string n, Department d) {
+        id = did;
+        name = n;
+        department = d;
+    }
 
-    void addAppointment(int patientId);
-    int seePatient();
+    void addAppointment(int patientId) {
+        appointmentQueue.push(patientId);
+        cout << "Appointment Added for patient " << patientId << " with " << name << endl;
+    }
+    int seePatient() {
+        if (appointmentQueue.empty()) {
+            cout << "No pending appointments for " << name << endl;
+            return -1;
+        }
+        int next = appointmentQueue.front();
+        appointmentQueue.pop();
+        return next;
+    }
 
     int getId() {
         return id;
@@ -81,7 +127,21 @@ public:
     string getName() {
         return name;
     }
-    string getDepartment();
+    string getDepartment() {
+        switch (department) {
+        case CARDIOLOGY: return "Cardiology";
+        case NEUROLOGY: return "Neurology";
+        case ORTHOPEDICS: return "Orthopedics";
+        case PEDIATRICS: return "Pediatrics";
+        case EMERGENCY: return "Emergency";
+        case GENERAL: return "General";
+        default: return "Unknown";
+        }
+    }
+
+    queue<int> getAppointmentQueue() {
+        return appointmentQueue;
+    }
 };
 
 // ========== HOSPITAL CLASS ========== //
@@ -96,14 +156,30 @@ private:
 public:
     Hospital();
 
-    int registerPatient(string name, int age, string contact);
+    int registerPatient(string name, int age, string contact) {
+        Patient p = Patient(patientCounter, name, age, contact);
+        patientCounter++;
+        patients.push_back(p);
+    }
     int addDoctor(string name, Department dept);
     void admitPatient(int patientId, RoomType type);
     void addEmergency(int patientId);
     int handleEmergency();
     void bookAppointment(int doctorId, int patientId);
     void displayPatientInfo(int patientId);
-    void displayDoctorInfo(int doctorId);
+    void displayDoctorInfo(int doctorId) {
+        for (Doctor d : doctors) {
+            if (d.getId() == doctorId) {
+                cout << "=== Dctor Information === " << endl;
+                cout << "ID: " << d.getId() << endl;
+                cout << "Name: " << d.getName() << endl;
+                cout << "Department: " << d.getDepartment() << endl;
+                cout << "Pending Appointments: " << d.getAppointmentQueue().size() << endl;
+
+            }
+        }
+        cout << "Doctor Not Found." << endl;
+    }
 };
 
 // ========== MAIN PROGRAM ========== //
