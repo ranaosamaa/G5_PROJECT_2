@@ -45,46 +45,20 @@ public:
 
     void admitPatient(RoomType type);
     void dischargePatient();
-    void addMedicalRecord(string record);
-    void requestTest(string testName) {
-        testQueue.push(testName);
-        cout << "Test requested for " << name << ": " << testName << endl;
-    }
-    string performTest() {
-        if (testQueue.empty()) {
-            cout << "No pending tests for " << name << endl;
-            return "";
-        }
+    void addMedicalRecord(string record) {
+        if (record.empty()) return;
 
-        string testName = testQueue.front();
-        testQueue.pop();
+        medicalHistory.push(record);
 
-        cout << "Performing test for " << name << ": " << testName << endl;
-        return testName;
+        cout << "Medical Record added for [" << name << "]: [" << record << "]\n";
     }
-    void displayHistory() {
-        stack<string> temp = medicalHistory;
-        if (temp.empty()) {
-            cout << "No Medical history for patient: " << name << endl;
-            return;
-        }
-        cout << "Medical History for Patient: " << name << " - ID: " << id << endl;
-        while (!temp.empty()) {
-            cout << temp.top() << endl;
-            cout << "----------------------------" << endl;
-            temp.pop();
-        }
-    }
+    void requestTest(string testName);
+    string performTest();
+    void displayHistory();
 
-    int getId() {
-        return id;
-    }
-    string getName() {
-        return name;
-    }
-    bool getAdmissionStatus() {
-        return isAdmitted;
-    }
+    int getId();
+    string getName();
+    bool getAdmissionStatus();
 };
 
 // ========== DOCTOR CLASS ========== //
@@ -101,19 +75,13 @@ public:
     void addAppointment(int patientId);
     int seePatient();
 
-    int getId();
-    string getName();
-    string getDepartment() {
-        switch (department) {
-        case CARDIOLOGY: return "Cardiology";
-        case NEUROLOGY: return "Neurology";
-        case ORTHOPEDICS: return "Orthopedics";
-        case PEDIATRICS: return "Pediatrics";
-        case EMERGENCY: return "Emergency";
-        case GENERAL: return "General";
-        default: return "Unknown";
-        }
+    int getId() {
+        return id;
     }
+    string getName() {
+        return name;
+    }
+    string getDepartment();
 };
 
 // ========== HOSPITAL CLASS ========== //
