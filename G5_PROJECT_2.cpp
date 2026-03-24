@@ -35,7 +35,13 @@ private:
     RoomType roomType;
 
 public:
-    Patient(int pid, string n, int a, string c);
+    Patient(int pid, string n, int a, string c) {
+        id = pid;
+        name = n;
+        age = a;
+        contact = c;
+        isAdmitted = false;
+    }
 
     void admitPatient(RoomType type);
     void dischargePatient();
