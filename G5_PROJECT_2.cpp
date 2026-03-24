@@ -21,6 +21,25 @@ enum RoomType {
     PRIVATE_ROOM,
     SEMI_PRIVATE
 };
+// Helper function to convert room number into a string for printing out 
+string Room_string(RoomType before_type){
+        string room_string;
+        switch(before_type){
+            case GENERAL_WARD :
+            room_string = "General Ward";
+            break;
+            case ICU:
+            room_string = "ICU";
+            break;
+            case PRIVATE_ROOM :
+            room_string = "Private Room";
+            break;
+            case SEMI_PRIVATE :
+              room_string = "Semi-Private";
+            break;                               
+        }    
+        return room_string;
+}
 
 // ========== PATIENT CLASS ========== //
 class Patient {
@@ -37,8 +56,33 @@ private:
 public:
     Patient(int pid, string n, int a, string c);
 
-    void admitPatient(RoomType type);
-    void dischargePatient();
+    void admitPatient(RoomType type){
+
+        // check if the patient is already admitted
+        if (isAdmitted){
+            cout << "Patient "<<name<< " is already admitted"<<endl;
+            return ;
+        }
+        // otherwise admitt the patient and assign a roomtype to it 
+        isAdmitted = true;
+        roomType = type;
+        // converting enum function
+        string pat_string;
+        pat_string = Room_string(type);
+        // print out what has been done
+        cout <<"Patient "<<name<<" admitted to "<<pat_string<<endl;
+    }
+    void dischargePatient(){
+        // check if patiient is not admitted
+        if(!isAdmitted){
+        cout << "Patient "<<name<< " is not currently admitted"<<endl;
+        return ;
+        }
+        // otherwise
+        isAdmitted = false;
+        cout << "Patient "<<name<< " has been discharged"<<endl;
+
+    }
     void addMedicalRecord(string record);
     void requestTest(string testName);
     string performTest();
