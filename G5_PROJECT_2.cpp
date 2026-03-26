@@ -41,6 +41,32 @@ string Room_string(RoomType before_type) {
     return room_string;
 }
 
+// Helper function to convert department number into a string for printing out 
+string Department_string(Department before_dep) {
+    string dep_string;
+    switch (before_dep) {
+    case CARDIOLOGY:
+        dep_string = "Cardiology";
+        break;
+    case NEUROLOGY:
+        dep_string = "Neurology";
+        break;
+    case ORTHOPEDICS:
+        dep_string = "Orthopedics";
+        break;
+    case PEDIATRICS:
+        dep_string = "Pediatrics";
+        break;
+    case EMERGENCY:
+        dep_string = "Emergency";
+        break;
+    case GENERAL:
+        dep_string = "General Practice";
+        break;
+    }
+    return dep_string;
+}
+
 // ========== PATIENT CLASS ========== //
 class Patient {
 private:
@@ -60,11 +86,12 @@ public:
         age = a;
         contact = c;
         isAdmitted = false;
+        roomType = GENERAL_WARD;
     }
     // Inside Patient<T> class (public:)
     int getAge() const { return age; }
     string getContact() const { return contact; }
-    string getRoomType() const { return roomType; }
+    string getRoomType() const { return Room_string(roomType); }
 
     void admitPatient(RoomType type) {
 
@@ -178,15 +205,7 @@ public:
         return name;
     }
     string getDepartment() {
-        switch (department) {
-        case CARDIOLOGY: return "Cardiology";
-        case NEUROLOGY: return "Neurology";
-        case ORTHOPEDICS: return "Orthopedics";
-        case PEDIATRICS: return "Pediatrics";
-        case EMERGENCY: return "Emergency";
-        case GENERAL: return "General";
-        default: return "Unknown";
-        }
+        return Department_string(department);
     }
 
     queue<int> getAppointmentQueue() {
@@ -211,11 +230,36 @@ public:
 
     int registerPatient(string name, int age, string contact) {
         Patient p = Patient(patientCounter, name, age, contact);
+        int patientId = patientCounter;
         patientCounter++;
         patients.push_back(p);
+        cout << "Patient registered: " << name << " (ID: " << patientId << ")" << endl;
+        return patientId;
     }
-    int addDoctor(string name, Department dept);
-    void admitPatient(int patientId, RoomType type);
+    int addDoctor(string name, Department dept) {
+        Doctor curr_doc(doctorCounter, name, dept); // Create a new doctor object
+        doctors.push_back(curr_doc); // add doctor to doctors vector
+        doctorCounter += 1; // increment doctor counter
+        cout << "Doctor added: " << name << " (ID: " << curr_doc.getId() << ") - " << Department_string(dept) << endl;
+        return curr_doc.getId(); // Return assigned Doctor id
+    }
+    void admitPatient(int patientId, RoomType type) {
+        // search for patient id in patients vecotr
+        for (int i = 0; i < patients.size(); i++) {
+            // if found call admit patient 
+            if (patients[i].getId() == patientId)
+            {
+                patients[i].admitPatient(type); // call patient admit patient method on it 
+                return;
+            }
+
+
+        }
+        // if not found print patient not found
+        cout << "Patient not found." << endl;
+
+
+    }
     void addEmergency(int patientId) {
         emergencyQueue.push(patientId);
         cout << "Emergency added for patient " << patientId << endl;
@@ -231,7 +275,36 @@ public:
         cout << "Handling emergency for patient " << patientId << endl;
         return patientId;
     }
-    void bookAppointment(int doctorId, int patientId);
+    void bookAppointment(int doctorId, int patientId) {
+        Doctor* foundDoctor = nullptr;
+        bool patientFound = false;
+
+        for (auto& d : doctors) {
+            if (d.getId() == doctorId) {
+                foundDoctor = &d;
+                break;
+            }
+        }
+
+        if (foundDoctor == nullptr) {
+            cout << "Doctor not found." << endl;
+            return;
+        }
+
+        for (auto& p : patients) {
+            if (p.getId() == patientId) {
+                patientFound = true;
+                break;
+            }
+        }
+
+        if (!patientFound) {
+            cout << "Patient not found." << endl;
+            return;
+        }
+
+        foundDoctor->addAppointment(patientId);
+    }
 
     void displayPatientInfo(int patientId) {
         for (auto& p : patients) {
@@ -246,7 +319,7 @@ public:
 
                 if (p.getAdmissionStatus()) {
                     cout << "Room Type: "
-                        << Room_string(p.getRoomType()) << "\n";
+                        << p.getRoomType() << "\n";
                 }
                 cout << endl;
                 return;
@@ -262,43 +335,12 @@ public:
                 cout << "Name: " << d.getName() << endl;
                 cout << "Department: " << d.getDepartment() << endl;
                 cout << "Pending Appointments: " << d.getAppointmentQueue().size() << endl;
-
+                return;
             }
         }
         cout << "Doctor Not Found." << endl;
     }
 };
-// Books an appointment only if both doctor ID and patient ID are valid
-void Hospital::bookAppointment(int doctorId, int patientId) {
-    Doctor* foundDoctor = nullptr;
-    bool patientFound = false;
-
-    for (auto& d : doctors) {
-        if (d.getId() == doctorId) {
-            foundDoctor = &d;
-            break;
-        }
-    }
-
-    if (foundDoctor == nullptr) {
-        cout << "Doctor not found." << endl;
-        return;
-    }
-
-    for (auto& p : patients) {
-        if (p.getId() == patientId) {
-            patientFound = true;
-            break;
-        }
-    }
-
-    if (!patientFound) {
-        cout << "Patient not found." << endl;
-        return;
-    }
-
-    foundDoctor->addAppointment(patientId);
-}
 
 // ========== MAIN PROGRAM ========== //
 int main() {
@@ -309,16 +351,22 @@ int main() {
     int p2 = hospital.registerPatient("Jane Smith", 28, "555-5678");
     int p3 = hospital.registerPatient("Mike Johnson", 45, "555-9012");
 
+    cout << endl;
+
     // Test Case 2: Adding doctors
     int d1 = hospital.addDoctor("Dr. Smith", CARDIOLOGY);
     int d2 = hospital.addDoctor("Dr. Brown", NEUROLOGY);
     int d3 = hospital.addDoctor("Dr. Lee", PEDIATRICS);
+
+    cout << endl;
 
     // Test Case 3: Admitting patients
     hospital.admitPatient(p1, PRIVATE_ROOM);
     hospital.admitPatient(p2, ICU);
     // Try admitting already admitted patient
     hospital.admitPatient(p1, SEMI_PRIVATE);
+
+    cout << endl;
 
     // Test Case 4: Booking appointments
     hospital.bookAppointment(d1, p1);
@@ -327,6 +375,8 @@ int main() {
     // Try booking with invalid doctor/patient
     hospital.bookAppointment(999, p1); // Invalid doctor
     hospital.bookAppointment(d1, 999); // Invalid patient
+
+    cout << endl;
 
     // Test Case 5: Handling medical tests
     // These would normally be called on Patient objects
@@ -339,6 +389,8 @@ int main() {
     emergencyPatient = hospital.handleEmergency();
     emergencyPatient = hospital.handleEmergency(); // No more emergencies
 
+    cout << endl;
+
     // Test Case 7: Discharging patients
     // Would normally call dischargePatient() on Patient objects
 
@@ -347,9 +399,13 @@ int main() {
     hospital.displayPatientInfo(p2);
     hospital.displayPatientInfo(999); // Invalid patient
 
+    cout << endl;
+
     hospital.displayDoctorInfo(d1);
     hospital.displayDoctorInfo(d2);
     hospital.displayDoctorInfo(999); // Invalid doctor
+
+    cout << endl;
 
     // Test Case 9: Doctor seeing patients
     // These would normally be called on Doctor objects
