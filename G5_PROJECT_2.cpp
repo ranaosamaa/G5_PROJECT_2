@@ -60,11 +60,11 @@ public:
         age = a;
         contact = c;
         isAdmitted = false;
-        roomType = GENERAL_WARD; // initialize to a default
     }
+    // Inside Patient<T> class (public:)
     int getAge() const { return age; }
     string getContact() const { return contact; }
-    string getRoomType() const { return Room_string(roomType); }
+    string getRoomType() const { return roomType; }
 
     void admitPatient(RoomType type) {
 
@@ -73,7 +73,7 @@ public:
             cout << "Patient " << name << " is already admitted" << endl;
             return;
         }
-        // otherwise admit the patient and assign a roomtype to it
+        // otherwise admitt the patient and assign a roomtype to it
         isAdmitted = true;
         roomType = type;
         // converting enum function
@@ -246,7 +246,7 @@ public:
 
                 if (p.getAdmissionStatus()) {
                     cout << "Room Type: "
-                        <<p.getRoomType() << "\n";
+                        << Room_string(p.getRoomType()) << "\n";
                 }
                 cout << endl;
                 return;
@@ -268,6 +268,37 @@ public:
         cout << "Doctor Not Found." << endl;
     }
 };
+// Books an appointment only if both doctor ID and patient ID are valid
+void Hospital::bookAppointment(int doctorId, int patientId) {
+    Doctor* foundDoctor = nullptr;
+    bool patientFound = false;
+
+    for (auto& d : doctors) {
+        if (d.getId() == doctorId) {
+            foundDoctor = &d;
+            break;
+        }
+    }
+
+    if (foundDoctor == nullptr) {
+        cout << "Doctor not found." << endl;
+        return;
+    }
+
+    for (auto& p : patients) {
+        if (p.getId() == patientId) {
+            patientFound = true;
+            break;
+        }
+    }
+
+    if (!patientFound) {
+        cout << "Patient not found." << endl;
+        return;
+    }
+
+    foundDoctor->addAppointment(patientId);
+}
 
 // ========== MAIN PROGRAM ========== //
 int main() {
